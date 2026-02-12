@@ -6,6 +6,9 @@
   "scripts": {
     "start": "node src/index.js",
     "sync": "node src/sync-realistic.js",
+    "sync:multi": "node src/cli/multi-sync.js",
+    "sync:status": "node src/cli/status.js",
+    "buffer:connect": "node src/cli/buffer-setup.js",
     "dashboard": "node src/dashboard/server.js",
     "dev": "nodemon src/sync-realistic.js",
     "dev:dashboard": "nodemon src/dashboard/server.js",
@@ -22,7 +25,8 @@
   "dependencies": {
     "axios": "^1.6.0",
     "dotenv": "^16.3.1",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "puppeteer": "^21.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",

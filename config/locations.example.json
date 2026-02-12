@@ -1,0 +1,35 @@
+[
+  {
+    "id": "tokyo_shibuya",
+    "name": "渋谷店",
+    "instagram_account_id": "1234567890",
+    "instagram_access_token": "optional_individual_token",
+    "gbp_location_id": "ChIJxxxxxxxxxxxxxxxxxxxxx",
+    "buffer_profile_id": "5f9a3b2c1d4e5f6g7h8i9j0k",
+    "active": true
+  },
+  {
+    "id": "tokyo_shinjuku",
+    "name": "新宿店",
+    "instagram_account_id": "0987654321",
+    "gbp_location_id": "ChIJyyyyyyyyyyyyyyyyyyyyy",
+    "buffer_profile_id": "1a2b3c4d5e6f7g8h9i0j1k2l",
+    "active": true
+  },
+  {
+    "id": "osaka_umeda",
+    "name": "梅田店",
+    "instagram_account_id": "1122334455",
+    "gbp_location_id": "ChIJzzzzzzzzzzzzzzzzzzzzz",
+    "buffer_profile_id": "3c4d5e6f7g8h9i0j1k2l3m4n",
+    "active": true
+  },
+  {
+    "id": "fukuoka_tenjin",
+    "name": "天神店",
+    "instagram_account_id": "5544332211",
+    "gbp_location_id": "ChIJwwwwwwwwwwwwwwwwwwww",
+    "buffer_profile_id": "5e6f7g8h9i0j1k2l3m4n5o6p",
+    "active": false
+  }
+]
