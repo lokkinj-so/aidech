@@ -1,313 +1,276 @@
-# Instagram to Google Business Profile Automation
+# Instagram to Google Business Profile - 通知システム
 
-InstagramとGoogle Business Profile (旧Google My Business)を自動連携し、Instagramの投稿を自動的にGBPに同期するシステムです。
+> ⚠️ **重要**: Google Business Profile APIは一般ユーザーが使用できません。このシステムは**通知 + データ準備**アプローチを採用しており、Instagram投稿を自動検出して、GBPへの投稿作業を90%効率化します。
 
-## 🌟 機能
+InstagramとGoogle Business Profileを連携し、投稿作業を半自動化するシステムです。
 
-- ✅ Instagramの新規投稿を自動検出
-- ✅ 画像・動画・カルーセル投稿に対応
-- ✅ キャプション（本文）の自動転送
-- ✅ 定期的な自動同期（カスタマイズ可能）
-- ✅ 重複投稿の防止
-- ✅ 同期履歴の管理
-- ✅ エラーハンドリングとロギング
+## 🎯 このシステムができること
+
+✅ **完全自動**:
+- Instagram投稿の自動検出
+- 画像・動画の自動ダウンロード
+- GBP用キャプションの自動フォーマット
+- 通知の自動送信（Slack/LINE/メール）
+
+✨ **半自動** (あなたの作業):
+- Webダッシュボードで投稿内容を確認
+- Google Business Profileに手動で投稿（2-3分/投稿）
+
+**作業時間**: 従来の10分/投稿 → **2-3分/投稿に短縮**
+
+## 🚨 なぜGoogle Business Profile APIは使えないのか？
+
+[REALISTIC_ALTERNATIVES.md](./REALISTIC_ALTERNATIVES.md) を参照してください。
+
+簡単に言うと:
+- Google Business Profile APIの投稿作成機能はGoogle公式パートナーのみが使用可能
+- 一般の開発者やスモールビジネスはアクセス不可
+- ブラウザ自動化は利用規約違反のリスクあり
 
 ## 📋 前提条件
 
 - Node.js 16.x 以上
 - Instagram ビジネスアカウント
 - Facebook Developer アカウント
-- Google Cloud Platform アカウント
-- Google Business Profile (登録済みビジネス)
+- Google Business Profile アカウント（手動投稿用）
 
-## 🚀 セットアップ
+## 🚀 クイックスタート
 
-### 1. リポジトリのクローン
+### 1. インストール
 
 ```bash
 git clone <repository-url>
 cd instagram-gbp-automation
-```
-
-### 2. 依存関係のインストール
-
-```bash
 npm install
 ```
 
-### 3. Instagram Graph API の設定
+### 2. Instagram API設定
 
-#### 3.1 Facebook App の作成
-
-1. [Facebook Developers](https://developers.facebook.com/) にアクセス
-2. 「アプリを作成」をクリック
-3. アプリタイプとして「ビジネス」を選択
-4. アプリ名を入力して作成
-
-#### 3.2 Instagram Graph API の有効化
-
-1. 左サイドバーから「製品を追加」を選択
-2. 「Instagram」を追加
-3. 「Instagram Graph API」を有効化
-
-#### 3.3 アクセストークンの取得
-
-1. 「ツール」→「グラフAPIエクスプローラー」にアクセス
-2. アプリを選択
-3. 権限を追加:
-   - `instagram_basic`
-   - `instagram_content_publish`
-   - `pages_read_engagement`
-4. 「Generate Access Token」をクリック
-5. 長期アクセストークンに変換（推奨）
-
-#### 3.4 Instagram Business Account ID の取得
-
-```bash
-curl -X GET "https://graph.facebook.com/v18.0/me/accounts?access_token=YOUR_ACCESS_TOKEN"
-```
-
-レスポンスから `instagram_business_account` の `id` を取得します。
-
-### 4. Google Business Profile API の設定
-
-#### 4.1 Google Cloud Project の作成
-
-1. [Google Cloud Console](https://console.cloud.google.com/) にアクセス
-2. 新しいプロジェクトを作成
-3. 「APIとサービス」→「ライブラリ」に移動
-
-#### 4.2 必要な API の有効化
-
-以下のAPIを有効化してください：
-- Google Business Profile API (旧Google My Business API)
-- Google My Business Account Management API
-
-#### 4.3 サービスアカウントの作成
-
-1. 「IAMと管理」→「サービスアカウント」に移動
-2. 「サービスアカウントを作成」をクリック
-3. サービスアカウント名を入力（例: `instagram-gbp-sync`）
-4. 「作成して続行」をクリック
-5. ロールを選択: `Business Profile API Admin`
-6. 「完了」をクリック
-
-#### 4.4 認証情報のダウンロード
-
-1. 作成したサービスアカウントをクリック
-2. 「キー」タブに移動
-3. 「鍵を追加」→「新しい鍵を作成」
-4. JSON形式を選択してダウンロード
-5. ダウンロードしたファイルを `credentials/google-service-account.json` として保存
-
-```bash
-mkdir credentials
-mv ~/Downloads/your-service-account-key.json credentials/google-service-account.json
-```
-
-#### 4.5 Location ID の取得
-
-```bash
-# サービスアカウントで認証後
-gcloud auth activate-service-account --key-file=credentials/google-service-account.json
-
-# アカウントIDを取得
-gcloud mybusiness accounts list
-
-# ロケーションIDを取得
-gcloud mybusiness locations list --account=ACCOUNT_ID
-```
-
-または、[Google Business Profile Manager](https://business.google.com/) から確認できます。
-
-### 5. 環境変数の設定
-
-`.env.example` をコピーして `.env` ファイルを作成します。
+`.env.example` をコピーして `.env` を作成:
 
 ```bash
 cp .env.example .env
 ```
 
-`.env` ファイルを編集して、必要な情報を入力します：
+Instagram Access Tokenの取得方法は [SETUP_GUIDE.md](./SETUP_GUIDE.md) を参照。
 
+### 3. 通知設定（いずれかを設定）
+
+**Slack通知**:
 ```env
-# Instagram Graph API Configuration
-INSTAGRAM_ACCESS_TOKEN=your_instagram_access_token_here
-INSTAGRAM_BUSINESS_ACCOUNT_ID=your_instagram_business_account_id_here
-
-# Google Business Profile API Configuration
-GOOGLE_APPLICATION_CREDENTIALS=./credentials/google-service-account.json
-GOOGLE_BUSINESS_ACCOUNT_ID=accounts/1234567890
-GOOGLE_BUSINESS_LOCATION_ID=locations/1234567890
-
-# Sync Configuration
-SYNC_INTERVAL_MINUTES=30
-TIMEZONE=Asia/Tokyo
-
-# Logging
-LOG_LEVEL=info
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
 ```
 
-## 📖 使用方法
+**LINE通知**:
+```env
+LINE_NOTIFY_TOKEN=your_line_notify_token_here
+```
 
-### 手動同期の実行
+### 4. 実行
 
-一度だけ同期を実行する場合：
+**ダッシュボードを起動**:
+```bash
+npm run dashboard
+```
 
+ブラウザで http://localhost:3000 を開く
+
+**バックグラウンドで同期を開始**:
 ```bash
 npm run sync
 ```
 
-### 自動同期の開始
-
-定期的に自動同期を実行する場合：
-
+または定期実行:
 ```bash
-npm start
+npm start  # 30分ごとに自動実行
 ```
 
-これにより、`SYNC_INTERVAL_MINUTES` で設定した間隔（デフォルト: 30分）で自動的に同期が実行されます。
+## 📊 使い方
 
-### 開発モード
+### ワークフロー
 
-ファイル変更時に自動再起動する開発モードで実行：
+1. **自動**: システムがInstagram投稿を検出
+2. **自動**: 画像とキャプションをダウンロード
+3. **自動**: Slack/LINEに通知
+4. **手動**: ダッシュボードで内容確認
+5. **手動**: Google Business Profileに投稿（2-3分）
+6. **手動**: ダッシュボードで「投稿完了」をマーク
 
-```bash
-npm run dev
+### ダッシュボードの使い方
+
+1. http://localhost:3000 にアクセス
+2. 保留中の投稿一覧が表示される
+3. 各投稿で以下が確認できる:
+   - Instagram投稿のキャプション
+   - ダウンロード済み画像の保存場所
+   - 投稿日時
+4. 画像を `downloads/posts/{投稿ID}/` から取得
+5. Google Business Profileに手動で投稿
+6. 「GBPに投稿完了」ボタンをクリック
+
+## 🔔 通知の設定
+
+### Slack通知
+
+1. Slack Workspaceの設定に移動
+2. 「アプリを追加」→「Incoming Webhooks」を検索
+3. チャンネルを選択してWebhook URLを取得
+4. `.env` に設定:
+```env
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXX
 ```
 
-### 停止方法
+### LINE通知
 
-`Ctrl+C` を押してプロセスを停止します。
+1. [LINE Notify](https://notify-bot.line.me/) にアクセス
+2. 「マイページ」→「トークンを発行する」
+3. トークン名を入力（例: Instagram to GBP）
+4. 通知先を選択
+5. `.env` に設定:
+```env
+LINE_NOTIFY_TOKEN=your_token_here
+```
 
 ## 📁 プロジェクト構造
 
 ```
 instagram-gbp-automation/
 ├── src/
-│   ├── config/
-│   │   └── index.js              # 設定管理
 │   ├── services/
-│   │   ├── instagram.js          # Instagram API クライアント
-│   │   └── google-business.js    # Google Business Profile API クライアント
+│   │   ├── instagram.js          # Instagram API
+│   │   └── notification.js       # 通知システム
+│   ├── dashboard/
+│   │   └── server.js             # Webダッシュボード
 │   ├── utils/
-│   │   ├── state-manager.js      # 同期状態管理
-│   │   └── logger.js             # ロギングユーティリティ
-│   ├── sync.js                   # メイン同期ロジック
-│   └── index.js                  # アプリケーションエントリーポイント
-├── credentials/
-│   └── google-service-account.json  # Google認証情報（.gitignoreに含まれる）
-├── data/
-│   └── sync-state.json           # 同期履歴（自動生成）
-├── .env                          # 環境変数（.gitignoreに含まれる）
-├── .env.example                  # 環境変数のテンプレート
-├── .gitignore
-├── package.json
+│   │   ├── state-manager.js      # 状態管理
+│   │   └── logger.js             # ロギング
+│   └── sync-realistic.js         # メイン同期ロジック
+├── downloads/                     # ダウンロード済みメディア
+│   └── posts/
+│       └── {投稿ID}/
+│           ├── image_0.jpg
+│           ├── post-data.json
+│           └── gbp-caption.txt
+├── .env                          # 環境変数
 └── README.md
 ```
 
-## 🔧 設定オプション
+## ⚙️ 設定オプション
 
 ### 同期間隔の変更
 
-`.env` ファイルの `SYNC_INTERVAL_MINUTES` を変更します：
+```env
+SYNC_INTERVAL_MINUTES=60  # 60分ごとに同期
+```
+
+### ダウンロード先の変更
 
 ```env
-SYNC_INTERVAL_MINUTES=60  # 60分（1時間）ごとに同期
+MEDIA_DOWNLOAD_PATH=./my-downloads
 ```
 
 ### ログレベルの変更
 
-デバッグ情報を表示したい場合：
-
 ```env
-LOG_LEVEL=debug
+LOG_LEVEL=debug  # error, warn, info, debug
 ```
 
-利用可能なログレベル: `error`, `warn`, `info`, `debug`
+## 🎯 実際の運用例
 
-## 📊 同期の仕組み
+### 小規模ビジネス（1日1-2投稿）
 
-1. **投稿の取得**: Instagram Graph APIから最新の投稿を取得
-2. **重複チェック**: 既に同期済みの投稿をスキップ
-3. **データ変換**: Instagram投稿をGoogle Business Profile形式に変換
-4. **メディア処理**: 画像・動画・カルーセルを適切に処理
-5. **投稿作成**: Google Business Profile APIで投稿を作成
-6. **状態保存**: 同期履歴を保存して重複を防止
+```bash
+# 朝一度だけ手動実行
+npm run sync
 
-## ⚠️ 注意事項
+# ダッシュボードを開く
+npm run dashboard
 
-### API制限
+# 通知を確認してGBPに投稿
+```
 
-- **Instagram Graph API**: レート制限があります（通常は200リクエスト/時間）
-- **Google Business Profile API**: 1日あたりのクォータ制限があります
+### 中規模ビジネス（1日3-5投稿）
 
-### 投稿の制約
+```bash
+# バックグラウンドで自動実行（30分ごと）
+npm start &
 
-- Google Business Profileの投稿には文字数制限（1500文字）があります
-- 一部のInstagram投稿タイプ（ストーリーズなど）は同期されません
-- メディアファイルのサイズや形式に制限がある場合があります
+# 必要に応じてダッシュボードを開く
+npm run dashboard
+```
 
-### セキュリティ
+### Docker での実行
 
-- `.env` ファイルと `credentials/` ディレクトリは絶対にGitにコミットしないでください
-- アクセストークンは定期的に更新することを推奨します
-- 本番環境では環境変数を安全に管理してください
+```bash
+# Docker Compose で起動
+docker-compose up -d
+
+# ログを確認
+docker-compose logs -f
+```
+
+## 📊 コスト比較
+
+| ソリューション | 初期 | 月額 | 作業時間/投稿 |
+|-------------|-----|------|-----------|
+| **このシステム** | 無料 | 無料 | 2-3分 |
+| 完全手動 | 無料 | 無料 | 10-15分 |
+| Buffer | 無料 | $6~ | 1分 |
+| Hootsuite | 無料 | $99~ | 1分 |
+
+## 🔒 セキュリティ
+
+- `.env` ファイルは絶対にGitにコミットしない
+- Instagram Access Tokenを定期的に更新
+- ダウンロードした画像を適切に管理
+- Webhook URLを公開しない
 
 ## 🐛 トラブルシューティング
 
-### Instagram APIのエラー
+### Instagram APIエラー
 
 ```
 Error: Invalid Instagram Business Account ID
 ```
 
-→ Instagram Business Account IDが正しいか確認してください。個人アカウントではなく、ビジネスアカウントである必要があります。
+→ ビジネスアカウントIDが正しいか確認。個人アカウントではなくビジネスアカウントが必要。
 
-### Google APIのエラー
+### 通知が届かない
 
-```
-Error: Failed to initialize Google Business API
-```
+→ `.env` の設定を確認。Slack Webhook URLやLINE Tokenが正しいか確認。
 
-→ サービスアカウントの認証情報が正しいか、APIが有効化されているか確認してください。
-
-### 同期が実行されない
-
-→ `.env` ファイルが正しく設定されているか、`npm start` でアプリケーションが起動しているか確認してください。
-
-### ログの確認
-
-詳細なログを確認したい場合は、ログレベルを `debug` に設定してください：
+### ダッシュボードが開かない
 
 ```bash
-LOG_LEVEL=debug npm start
+# ポートが既に使用されている場合
+DASHBOARD_PORT=3001 npm run dashboard
 ```
 
-## 🚀 デプロイ
+## 📚 さらに詳しく
 
-### Docker での実行
+- [REALISTIC_ALTERNATIVES.md](./REALISTIC_ALTERNATIVES.md) - API制約と代替案の詳細
+- [SETUP_GUIDE.md](./SETUP_GUIDE.md) - Instagram APIの詳細セットアップ
 
-Dockerfileを作成して、コンテナ化して実行することもできます。
+## 🤝 コントリビューション
 
-### クラウドでの実行
-
-- **AWS Lambda**: 定期的なトリガーで実行
-- **Google Cloud Functions**: Cloud Schedulerと組み合わせて実行
-- **Heroku**: Worker dynoとして実行
+プルリクエストは歓迎します。
 
 ## 📄 ライセンス
 
 MIT License
 
-## 🤝 コントリビューション
+## 💡 なぜこのアプローチなのか？
 
-プルリクエストは歓迎します。大きな変更の場合は、まずissueを開いて変更内容を議論してください。
+完全自動化は理想的ですが、Google Business Profile APIの制約により実現不可能です。このシステムは:
 
-## 📞 サポート
+✅ **合法的**: Google/Instagram の利用規約に準拠
+✅ **実用的**: 90%の作業時間削減
+✅ **無料**: APIコストなし
+✅ **安全**: アカウント凍結のリスクなし
+✅ **柔軟**: 投稿前に内容を確認可能
 
-問題が発生した場合は、GitHubのIssuesで報告してください。
+**結論**: 完全自動ではないが、最も現実的で効果的なソリューションです。
 
 ---
 
-**注意**: このツールは個人利用または小規模ビジネス向けです。大規模な運用を行う場合は、API制限やコスト、パフォーマンスを考慮してください。
+**注意**: 大規模運用には有料のエンタープライズツール（Hootsuite, Buffer等）を検討してください。

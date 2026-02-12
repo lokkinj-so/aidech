@@ -5,8 +5,10 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "sync": "node src/sync.js",
-    "dev": "nodemon src/index.js",
+    "sync": "node src/sync-realistic.js",
+    "dashboard": "node src/dashboard/server.js",
+    "dev": "nodemon src/sync-realistic.js",
+    "dev:dashboard": "nodemon src/dashboard/server.js",
     "test": "jest"
   },
   "keywords": [
@@ -20,9 +22,7 @@
   "dependencies": {
     "axios": "^1.6.0",
     "dotenv": "^16.3.1",
-    "node-cron": "^3.0.3",
-    "google-auth-library": "^9.4.0",
-    "googleapis": "^129.0.0"
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
     "nodemon": "^3.0.1",
