@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  instagram-gbp-sync:
+    build: .
+    container_name: instagram-gbp-automation
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./credentials:/app/credentials:ro
+      - ./data:/app/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
