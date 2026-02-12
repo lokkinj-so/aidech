@@ -85,6 +85,27 @@ npm run sync
 npm start  # 30分ごとに自動実行
 ```
 
+### 5. 🤖 完全自動化（GitHub Actions - 推奨）
+
+**完全無料**で2時間ごとに自動同期できます！
+
+1. GitHub Secretsを設定（Settings → Secrets and variables → Actions）:
+   - `INSTAGRAM_ACCESS_TOKEN`
+   - `INSTAGRAM_BUSINESS_ACCOUNT_ID`
+   - `SLACK_WEBHOOK_URL` または `LINE_NOTIFY_TOKEN`
+
+2. `.github/workflows/instagram-sync.yml` が自動で実行される
+
+3. **それだけ！** 通知が届いたらGBPに投稿するだけ
+
+**詳細**: [AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md)
+
+**メリット**:
+- ✅ 完全無料（月2,000分の無料枠）
+- ✅ サーバー不要
+- ✅ メンテナンスフリー
+- ✅ 30分〜2時間ごとに自動実行
+
 ## 📊 使い方
 
 ### ワークフロー
@@ -215,6 +236,26 @@ npm start &
 npm run dashboard
 ```
 
+### GitHub Actions（完全自動 - 推奨）
+
+```bash
+# 何もしない！
+# GitHub Actionsが2時間ごとに自動実行
+
+# 通知が届いたら:
+# 1. Artifactsから画像をダウンロード
+# 2. GBPに投稿（2-3分）
+# 3. 完了！
+```
+
+**メリット**:
+- ✅ 完全無料
+- ✅ サーバー不要
+- ✅ メンテナンスフリー
+- ✅ 2時間ごとに自動実行
+
+**詳細**: [AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md)
+
 ### Docker での実行
 
 ```bash
@@ -227,12 +268,14 @@ docker-compose logs -f
 
 ## 📊 コスト比較
 
-| ソリューション | 初期 | 月額 | 作業時間/投稿 |
-|-------------|-----|------|-----------|
-| **このシステム** | 無料 | 無料 | 2-3分 |
-| 完全手動 | 無料 | 無料 | 10-15分 |
-| Buffer | 無料 | $6~ | 1分 |
-| Hootsuite | 無料 | $99~ | 1分 |
+| ソリューション | 初期 | 月額 | 作業時間/投稿 | 自動化レベル |
+|-------------|-----|------|-----------|----------|
+| **このシステム + GitHub Actions** | 無料 | **無料** | 2-3分 | 95% 🏆 |
+| このシステム（手動実行） | 無料 | 無料 | 2-3分 | 90% |
+| 完全手動 | 無料 | 無料 | 10-15分 | 0% |
+| Zapier + Buffer | 無料 | $26~ | 30秒 | 99% |
+| Buffer | 無料 | $6~ | 1分 | 80% |
+| Hootsuite | 無料 | $99~ | 1分 | 95% |
 
 ## 🔒 セキュリティ
 
@@ -264,6 +307,8 @@ DASHBOARD_PORT=3001 npm run dashboard
 
 ## 📚 さらに詳しく
 
+- [AUTOMATION_GUIDE.md](./AUTOMATION_GUIDE.md) - **完全自動化ガイド（GitHub Actions）** 🆕
+- [ZAPIER_INTEGRATION.md](./ZAPIER_INTEGRATION.md) - Zapier連携ガイド 🆕
 - [REALISTIC_ALTERNATIVES.md](./REALISTIC_ALTERNATIVES.md) - API制約と代替案の詳細
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md) - Instagram APIの詳細セットアップ
 

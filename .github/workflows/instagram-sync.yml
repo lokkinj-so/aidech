@@ -1,0 +1,75 @@
+name: Instagram to GBP Automation
+
+on:
+  # 定期実行: 2時間ごと（無料で完全自動）
+  schedule:
+    - cron: '0 */2 * * *'  # 2時間ごと
+    # - cron: '*/30 * * * *'  # 30分ごと（推奨）
+    # - cron: '0 * * * *'  # 1時間ごと
+    # - cron: '0 0 * * *'  # 1日1回（深夜0時）
+
+  # 手動実行も可能
+  workflow_dispatch:
+
+  # プッシュ時もテスト実行（オプション）
+  # push:
+  #   branches: [ main, master ]
+
+jobs:
+  sync-instagram:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create .env file from secrets
+        run: |
+          echo "INSTAGRAM_ACCESS_TOKEN=${{ secrets.INSTAGRAM_ACCESS_TOKEN }}" >> .env
+          echo "INSTAGRAM_BUSINESS_ACCOUNT_ID=${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}" >> .env
+          echo "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" >> .env
+          echo "LINE_NOTIFY_TOKEN=${{ secrets.LINE_NOTIFY_TOKEN }}" >> .env
+          echo "ZAPIER_WEBHOOK_URL=${{ secrets.ZAPIER_WEBHOOK_URL }}" >> .env
+          echo "DASHBOARD_URL=${{ secrets.DASHBOARD_URL }}" >> .env
+          echo "MEDIA_DOWNLOAD_PATH=./downloads" >> .env
+          echo "SYNC_INTERVAL_MINUTES=120" >> .env
+          echo "TIMEZONE=Asia/Tokyo" >> .env
+          echo "LOG_LEVEL=info" >> .env
+
+      - name: Run Instagram sync
+        run: npm run sync
+        env:
+          TZ: Asia/Tokyo
+
+      - name: Upload downloaded media (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: instagram-media-${{ github.run_number }}
+          path: downloads/
+          retention-days: 30
+
+      - name: Commit and push new posts data
+        if: success()
+        run: |
+          git config --global user.name 'GitHub Actions Bot'
+          git config --global user.email 'actions@github.com'
+          git add data/posts.json || true
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-sync: Update Instagram posts data [skip ci]" && git push)
+        continue-on-error: true
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Sync failed. Check the logs for details."
+          # オプション: Slackに失敗通知を送信
+          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} -d '{"text":"⚠️ Instagram sync failed!"}'
