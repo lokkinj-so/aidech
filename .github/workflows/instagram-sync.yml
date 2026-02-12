@@ -37,7 +37,6 @@ jobs:
           echo "INSTAGRAM_ACCESS_TOKEN=${{ secrets.INSTAGRAM_ACCESS_TOKEN }}" >> .env
           echo "INSTAGRAM_BUSINESS_ACCOUNT_ID=${{ secrets.INSTAGRAM_BUSINESS_ACCOUNT_ID }}" >> .env
           echo "SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}" >> .env
-          echo "LINE_NOTIFY_TOKEN=${{ secrets.LINE_NOTIFY_TOKEN }}" >> .env
           echo "ZAPIER_WEBHOOK_URL=${{ secrets.ZAPIER_WEBHOOK_URL }}" >> .env
           echo "DASHBOARD_URL=${{ secrets.DASHBOARD_URL }}" >> .env
           echo "MEDIA_DOWNLOAD_PATH=./downloads" >> .env
