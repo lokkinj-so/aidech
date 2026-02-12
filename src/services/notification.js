@@ -6,6 +6,7 @@ class NotificationService {
     this.email = config.email || process.env.NOTIFICATION_EMAIL;
     this.slackWebhook = config.slackWebhook || process.env.SLACK_WEBHOOK_URL;
     this.lineToken = config.lineToken || process.env.LINE_NOTIFY_TOKEN;
+    this.zapierWebhook = config.zapierWebhook || process.env.ZAPIER_WEBHOOK_URL;
     this.dashboardUrl = config.dashboardUrl || process.env.DASHBOARD_URL || 'http://localhost:3000';
   }
 
@@ -26,6 +27,10 @@ class NotificationService {
 
     if (this.lineToken) {
       notifications.push(this.sendToLine(message));
+    }
+
+    if (this.zapierWebhook) {
+      notifications.push(this.sendToZapier(message, post));
     }
 
     if (this.email) {
@@ -188,6 +193,43 @@ ${message.caption}
       logger.info('LINE notification sent');
     } catch (error) {
       logger.error('Failed to send LINE notification:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Send notification to Zapier
+   * @param {Object} message - Formatted message
+   * @param {Object} post - Original post data
+   */
+  async sendToZapier(message, post) {
+    try {
+      const payload = {
+        event: 'new_instagram_post',
+        post_id: post.id,
+        caption: post.caption || '',
+        formatted_caption: message.fullCaption,
+        media_type: post.media_type,
+        media_url: post.media_url,
+        thumbnail_url: post.thumbnail_url || '',
+        permalink: post.permalink,
+        timestamp: post.timestamp,
+        username: post.username || '',
+        download_path: message.downloadPath,
+        dashboard_url: message.dashboardUrl,
+      };
+
+      // Add carousel media if available
+      if (post.childMedia && post.childMedia.length > 0) {
+        payload.media_urls = post.childMedia.map(child => child.media_url);
+        payload.media_count = post.childMedia.length;
+      }
+
+      await axios.post(this.zapierWebhook, payload);
+
+      logger.info('Zapier webhook sent');
+    } catch (error) {
+      logger.error('Failed to send Zapier webhook:', error.message);
       throw error;
     }
   }

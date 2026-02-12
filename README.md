@@ -131,6 +131,22 @@ SLACK_WEBHOOK_URL=https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXX
 LINE_NOTIFY_TOKEN=your_token_here
 ```
 
+### Zapier連携（推奨）
+
+Zapierを使えば、さらに多くのサービスと連携できます。
+
+1. [Zapier](https://zapier.com/) でアカウント作成
+2. 「Create Zap」→「Webhooks by Zapier」を選択
+3. 「Catch Hook」を選択してWebhook URLを取得
+4. `.env` に設定:
+```env
+ZAPIER_WEBHOOK_URL=https://hooks.zapier.com/hooks/catch/xxxxx/yyyyy/
+```
+5. `npm run sync` でテスト実行
+6. Zapierで好きなActionを追加（Slack、Buffer、Hootsuite等）
+
+詳細は [ZAPIER_INTEGRATION.md](./ZAPIER_INTEGRATION.md) を参照。
+
 ## 📁 プロジェクト構造
 
 ```
